@@ -10,7 +10,7 @@
 export const STORAGE_KEY = "bb-plugin-fontsize:root-px";
 export const DEFAULT_ROOT_PX = 16;
 export const MIN_ROOT_PX = 11;
-export const MAX_ROOT_PX = 24;
+export const MAX_ROOT_PX = 26;
 
 /** Fires in the current window whenever this plugin changes the size. */
 const CHANGE_EVENT = "bb-plugin-fontsize:change";
@@ -24,8 +24,8 @@ export interface FontScalePreset {
 export const PRESETS: readonly FontScalePreset[] = [
   { px: 13, label: "Small" },
   { px: 16, label: "Default" },
-  { px: 18, label: "Large" },
-  { px: 20, label: "Extra large" },
+  { px: 20, label: "Large" },
+  { px: 26, label: "Extra large" },
 ];
 
 export function clampRootFontPx(px: number): number {

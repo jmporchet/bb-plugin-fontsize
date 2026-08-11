@@ -9,10 +9,10 @@ covers themes and palettes. This plugin adds one, without forking bb.
 ## What it does
 
 - **A sidebar footer button**, in the same group as Settings and Remote access.
-  One click steps through **Small (13px) → Default (16px) → Large (18px) →
-  Extra large (20px)** and wraps around.
+  One click steps through **Small (13px) → Default (16px) → Large (20px) →
+  Extra large (26px)** and wraps around.
 - **A settings panel** (Extensions → Plugins → Font size) with the same presets
-  plus ±1px fine control from 11px to 24px, and a Reset.
+  plus ±1px fine control from 11px to 26px, and a Reset.
 
 Both scale the entire app — sidebar, chat, composer, panels. bb's UI is
 Tailwind with rem-based type scales and no explicit `html { font-size }`, so
@@ -70,7 +70,7 @@ changing the size in one window updates the others on the same device.
 - **No popover.** `sidebarFooterAction` is host-rendered chrome: `run` receives
   no anchor element, so there is no way to open a dropdown from the button
   itself. Hence cycle-on-click, with the full selector in settings.
-- **Very large sizes reflow the sidebar.** At 22–24px the sidebar and composer
+- **Very large sizes reflow the sidebar.** At 24–26px the sidebar and composer
   get noticeably chunkier. That is the intended trade-off of scaling rather
   than zooming; use the ±1px control to find a size you like.
 - **Some bb chrome is sized in hardcoded pixels.** A few surfaces compute their

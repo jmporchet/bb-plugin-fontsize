@@ -113,18 +113,25 @@ describe("subscribeRootFontPx", () => {
 describe("nextPreset", () => {
   it("steps up through the presets", () => {
     expect(nextPreset(13).px).toBe(16);
-    expect(nextPreset(16).px).toBe(18);
-    expect(nextPreset(18).px).toBe(20);
+    expect(nextPreset(16).px).toBe(20);
+    expect(nextPreset(20).px).toBe(26);
   });
 
   it("wraps to the smallest preset from the largest", () => {
-    expect(nextPreset(20).px).toBe(PRESETS[0]!.px);
+    expect(nextPreset(26).px).toBe(PRESETS[0]!.px);
     expect(nextPreset(MAX_ROOT_PX).px).toBe(PRESETS[0]!.px);
   });
 
   it("steps up from a fine-tuned size that is not a preset", () => {
     expect(nextPreset(14).px).toBe(16);
     expect(nextPreset(11).px).toBe(13);
+    expect(nextPreset(18).px).toBe(20);
+  });
+
+  it("keeps every preset reachable within the supported range", () => {
+    for (const preset of PRESETS) {
+      expect(clampRootFontPx(preset.px)).toBe(preset.px);
+    }
   });
 });
 

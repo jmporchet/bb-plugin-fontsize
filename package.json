@@ -1,6 +1,6 @@
 {
   "name": "bb-plugin-fontsize",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Scale the whole bb interface from a sidebar button.",
   "type": "module",
   "license": "MIT",
