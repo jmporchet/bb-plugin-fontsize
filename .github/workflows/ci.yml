@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # `bb plugin build` downloads esbuild + tailwind on first use.
+      - name: Cache the bb plugin build toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.bb/plugins/toolchain-*
+          key: bb-toolchain-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: bb-toolchain-${{ runner.os }}-
+
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Check the built bundle is self-consistent
+        run: |
+          test -s dist/app.js
+          test -s dist/app.css
+          test -s dist/server.js
+          node -e '
+            const meta = require("./dist/app.meta.json");
+            const pkg = require("./package.json");
+            if (meta.pluginVersion !== pkg.version) {
+              throw new Error(
+                `dist/app.meta.json pluginVersion ${meta.pluginVersion} != package.json ${pkg.version}`,
+              );
+            }
+            console.log(`ok: ${meta.pluginId}@${meta.pluginVersion}, SDK ${meta.sdkVersion}`);
+          '

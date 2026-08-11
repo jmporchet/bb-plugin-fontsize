@@ -1,0 +1,5 @@
+dist/
+node_modules/
+
+# Scaffolded by `bb plugin new` and unused: the manifest sets `"skills": []`.
+skills/
