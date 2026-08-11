@@ -73,6 +73,12 @@ changing the size in one window updates the others on the same device.
 - **Very large sizes reflow the sidebar.** At 22–24px the sidebar and composer
   get noticeably chunkier. That is the intended trade-off of scaling rather
   than zooming; use the ±1px control to find a size you like.
+- **Some bb chrome is sized in hardcoded pixels.** A few surfaces compute their
+  height in JavaScript from pixel constants that assume a 16px root, so they do
+  not grow with the font and clip their own contents. The queued-messages panel
+  is the known case, and this plugin compensates for it (see below). If you find
+  another surface that clips at larger sizes, please open an issue with a
+  screenshot — the fix is usually one more selector.
 
 ## Development
 
@@ -102,6 +108,7 @@ Refresh them against a newer bb with `bb plugin types`.
 | --- | --- |
 | [`lib/font-scale.ts`](lib/font-scale.ts) | Read, clamp, apply, persist and observe the root font size. All the logic, no bb dependency — this is what the tests cover. |
 | [`app.tsx`](app.tsx) | Registers a `contentScripts` entry (applies the size to the app shell), a `sidebarFooterAction` (the cycle button) and a `settingsSection` (the selector). |
+| [`lib/fixed-height-compensation.ts`](lib/fixed-height-compensation.ts) | Rescales bb chrome whose height is a hardcoded pixel value. See below. |
 | [`server.ts`](server.ts) | Intentionally empty. `bb.server` is a required manifest field, but nothing about a per-device font size needs a server. |
 | [`assets/icon.svg`](assets/icon.svg) | The `Aa` glyph. bb's icon registry has no text/font icon, so the plugin ships its own; bb serves it hashed and renders it as a CSS mask so it inherits the sidebar's text colour. |
 
@@ -109,6 +116,30 @@ The content script is the load-bearing piece: the plugin SDK exposes no
 font-size API, and `app.contentScripts.register` is the sanctioned way to run
 trusted same-origin code against the bb app shell. It sets exactly one
 property on one element and removes it again on dispose.
+
+### Fixed-pixel chrome
+
+Most of bb scales cleanly, because its type scales are rem-based. A few
+surfaces do not: they compute a height in JavaScript from pixel constants. The
+queued-messages panel sizes itself to `min(174, 57 + rows * 33)` pixels in
+drawer mode, which budgets 33px per row — right at a 16px root, too small at
+20px, where the row is nearer 41px and the panel clips its last message.
+
+Those heights land in the DOM as an inline `style="height: Npx"`, so
+`lib/fixed-height-compensation.ts` watches for them and rewrites them at the
+same ratio as the font. It is deliberately conservative:
+
+- It matches on `aria-label`, a user-visible accessibility contract, rather
+  than on an internal class name.
+- It only ever rewrites a plain `Npx` inline height, and remembers bb's own
+  value so it never compounds its own writes.
+- It restores bb's value on dispose.
+- If bb stops emitting an inline height, or renames the region, nothing matches
+  and the panel behaves exactly as it would without this plugin.
+
+This is a workaround against host internals, and the only part of this plugin
+that could quietly stop working after a bb upgrade. It fails open rather than
+breaking the panel.
 
 ## License
 

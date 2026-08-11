@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1
+
+- Fix the queued-messages panel clipping its last message at larger font sizes.
+  bb sizes that panel with pixel constants that assume a 16px root
+  (`min(174, 57 + rows * 33)` in drawer mode), so it did not grow with the
+  font. Its inline height is now rescaled to match, and restored on dispose.
+
 ## 0.1.0
 
 Initial release.

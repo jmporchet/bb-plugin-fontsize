@@ -22,6 +22,7 @@ import {
   subscribeRootFontPx,
   syncRootFontPx,
 } from "@/lib/font-scale";
+import { installFixedHeightCompensation } from "@/lib/fixed-height-compensation";
 
 /** Live root font-size for this window, kept in sync with other windows. */
 function useRootFontPx(): number {
@@ -102,15 +103,21 @@ export default definePluginApp((app) => {
     id: "apply-root-font-size",
     mount({ signal }) {
       syncRootFontPx();
-      // Keep this window in step when another bb window changes the size.
-      window.addEventListener(
-        "storage",
-        (event) => {
-          if (event.key !== STORAGE_KEY) return;
-          syncRootFontPx();
-        },
-        { signal },
+
+      // Some bb chrome is sized in JavaScript with pixel constants that assume
+      // a 16px root, so it does not grow with the font and clips its content.
+      const rescaleFixedHeights = installFixedHeightCompensation(
+        readRootFontPx,
+        signal,
       );
+
+      // Covers the footer button and settings panel in this window, and other
+      // bb windows on this device writing the same key.
+      subscribeRootFontPx(() => {
+        syncRootFontPx();
+        rescaleFixedHeights();
+      }, signal);
+
       return () => releaseRootFontPx();
     },
   });
